@@ -1,9 +1,15 @@
 //sign_in_screen
 import 'package:flutter/material.dart';
+import 'package:task_manager/data/models/login_response.dart';
+import 'package:task_manager/data/models/response_object.dart';
+import 'package:task_manager/data/services/network_caller.dart';
+import 'package:task_manager/data/utility/urls.dart';
+import 'package:task_manager/presentation/controllers/auth_controller.dart';
 import 'package:task_manager/presentation/screens/auth/email_verification_screen.dart';
 import 'package:task_manager/presentation/screens/auth/sign_up_screen.dart';
 import 'package:task_manager/presentation/screens/bottom_nav_screen.dart';
 import 'package:task_manager/presentation/widgets/app_background.dart';
+import 'package:task_manager/presentation/widgets/snack_bar_message.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -13,9 +19,10 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailTEController = TextEditingController();
+  final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isLoginInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -23,87 +30,113 @@ class _SignInScreenState extends State<SignInScreen> {
       body: AppBackground(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(24),
             child: Form(
               key: _formKey,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
-                    height: 100,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Get Started With',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
+                  const SizedBox(height: 100),
+                  Text(
+                    'Get Started With',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(
                     height: 16,
                   ),
                   TextFormField(
-                    controller: _emailController,
+                    controller: _emailTEController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       hintText: 'Email',
-                      //borderSide: BorderSide.none
                     ),
+                    // TODO: How to reuse this
+                    validator: (String? value) {
+                      if (value?.trim().isEmpty ?? true) {
+                        return 'Enter your email';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(
-                    height: 12,
+                    height: 8,
                   ),
                   TextFormField(
-                    controller: _passwordController,
-                    keyboardType: TextInputType.visiblePassword,
+                    controller: _passwordTEController,
                     obscureText: true,
-                    decoration: const InputDecoration(hintText: 'Password'),
+                    decoration: const InputDecoration(
+                      hintText: 'Password',
+                    ),
+                    validator: (String? value) {
+                      if (value?.trim().isEmpty ?? true) {
+                        return 'Enter your password';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(
-                    height: 32,
+                    height: 16,
                   ),
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
+                    child: Visibility(
+                      visible: _isLoginInProgress == false,
+                      replacement: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const BottomNavScreen(),), (route) => false);
+                          if (_formKey.currentState!.validate()) {
+                            _signIn();
+                          }
                         },
-                        child: const Icon(Icons.arrow_circle_right_outlined)),
+                        child: const Icon(Icons.arrow_circle_right_outlined),
+                      ),
+                    ),
                   ),
                   const SizedBox(
                     height: 60,
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const EmailVerificationScreen(),
-                        ),
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.grey,
-                      textStyle:
-                      const TextStyle(color: Colors.black54, fontSize: 16),
+                  Center(
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                          foregroundColor: Colors.grey,
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          )),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const EmailVerificationScreen()));
+                      },
+                      child: const Text(
+                        'Forgot Password?',
+                      ),
                     ),
-                    child: const Text('Forgot Password?'),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account?"),
+                      const Text(
+                        "Don't have an account?",
+                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                      ),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const SignUpScreen(),
-                              ));
+                                  builder: (context) => const SignUpScreen()));
                         },
-                        child: const Text('Sign Up'),
+                        child: const Text(
+                          'Sign up',
+                        ),
                       ),
                     ],
-                  ),
+                  )
                 ],
               ),
             ),
@@ -113,11 +146,49 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  Future<void> _signIn() async {
+    _isLoginInProgress = true;
+    setState(() {});
+    Map<String, dynamic> inputParams = {
+      'email': _emailTEController.text.trim(),
+      'password': _passwordTEController.text,
+    };
+    final ResponseObject response = await NetworkCaller.postRequest(
+        Urls.login, inputParams,
+        fromSignIn: true);
+    _isLoginInProgress = false;
+    setState(() {});
+
+    if (response.isSuccess) {
+      if (!mounted) {
+        return;
+      }
+
+      LoginResponse loginResponse =
+          LoginResponse.fromJson(response.responseBody);
+
+      /// Save the data to local cache
+      await AuthController.saveUserData(loginResponse.userData!);
+      await AuthController.saveUserToken(loginResponse.token!);
+
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const BottomNavScreen()),
+            (route) => false);
+      }
+    } else {
+      if (mounted) {
+        showSnackBarMessage(
+            context, response.errorMessage ?? 'Login failed! Try again');
+      }
+    }
+  }
+
   @override
   void dispose() {
-    // TODO: implement dispose
+    _emailTEController.dispose();
+    _passwordTEController.dispose();
     super.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
   }
 }
