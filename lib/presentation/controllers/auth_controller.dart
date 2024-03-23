@@ -9,7 +9,9 @@ class AuthController {
 
   static Future<void> saveUserData(UserData userData) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.setString('userData', jsonEncode(userData.toJson()));
+
+    await sharedPreferences.setString(
+        'userData', jsonEncode(userData.toJson()));
     AuthController.userData = userData;
   }
 
@@ -19,7 +21,7 @@ class AuthController {
     if (result == null) {
       return null;
     }
-    final user =  UserData.fromJson(jsonDecode(result));
+    final user = UserData.fromJson(jsonDecode(result));
     AuthController.userData = user;
     return user;
   }
@@ -47,6 +49,7 @@ class AuthController {
 
   static Future<void> clearUserData() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
     await sharedPreferences.clear();
   }
 }

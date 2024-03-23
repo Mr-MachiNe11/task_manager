@@ -12,7 +12,9 @@ PreferredSizeWidget get profileAppBar {
     title: InkWell(
       onTap: () {
         // Get the current route name
-        String currentRoute = TaskManager.navigatorKey.currentState!.context.widget.runtimeType.toString();
+        String currentRoute = TaskManager
+            .navigatorKey.currentState!.context.widget.runtimeType
+            .toString();
 
         // Check if the current route is not UpdateProfileScreen
         if (currentRoute != 'UpdateProfileScreen') {
@@ -30,19 +32,19 @@ PreferredSizeWidget get profileAppBar {
           const SizedBox(
             width: 12,
           ),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Rabbil Hasan',
-                  style: TextStyle(
+                  AuthController.userData?.fullName ?? '',
+                  style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400),
+                      fontSize: 16,
+                      ),
                 ),
-                Text('rabbilhasan69@gmail.com',
-                    style: TextStyle(
+                Text(AuthController.userData?.email ?? '',
+                    style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
                         fontWeight: FontWeight.w400)),

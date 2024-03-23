@@ -83,7 +83,7 @@ class _TaskCardState extends State<TaskCard> {
               ListTile(
                 title: const Text('New'),
                 trailing:
-                    _isCurrentStatus('New') ? const Icon(Icons.check) : null,
+                _isCurrentStatus('New') ? const Icon(Icons.check) : null,
                 onTap: () {
                   if (_isCurrentStatus('New')) {
                     return;
@@ -146,7 +146,7 @@ class _TaskCardState extends State<TaskCard> {
     _updateTaskStatusInProgress = true;
     setState(() {});
     final response =
-        await NetworkCaller.getRequest(Urls.updateTaskStatus(id, status));
+    await NetworkCaller.getRequest(Urls.updateTaskStatus(id, status));
     _updateTaskStatusInProgress = false;
     if (response.isSuccess) {
       _updateTaskStatusInProgress = false;
@@ -172,7 +172,7 @@ class _TaskCardState extends State<TaskCard> {
       setState(() {});
       if (mounted) {
         showSnackBarMessage(
-            context, response.errorMessage ?? 'Delete task has been failed');
+            context, response.errorMessage ?? 'Delete task failed!');
       }
     }
   }

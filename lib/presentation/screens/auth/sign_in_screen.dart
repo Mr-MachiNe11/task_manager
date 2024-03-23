@@ -19,8 +19,8 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final TextEditingController _emailTEController = TextEditingController();
-  final TextEditingController _passwordTEController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoginInProgress = false;
 
@@ -45,15 +45,14 @@ class _SignInScreenState extends State<SignInScreen> {
                     height: 16,
                   ),
                   TextFormField(
-                    controller: _emailTEController,
+                    controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       hintText: 'Email',
                     ),
-                    // TODO: How to reuse this
-                    validator: (String? value) {
-                      if (value?.trim().isEmpty ?? true) {
-                        return 'Enter your email';
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your mobile number';
                       }
                       return null;
                     },
@@ -62,14 +61,18 @@ class _SignInScreenState extends State<SignInScreen> {
                     height: 8,
                   ),
                   TextFormField(
-                    controller: _passwordTEController,
+                    keyboardType: TextInputType.visiblePassword,
+                    controller: _passwordController,
                     obscureText: true,
                     decoration: const InputDecoration(
                       hintText: 'Password',
                     ),
-                    validator: (String? value) {
-                      if (value?.trim().isEmpty ?? true) {
-                        return 'Enter your password';
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your mobile number';
+                      }
+                      if (value.length <= 6) {
+                        return 'Password must be at least 6 characters long';
                       }
                       return null;
                     },
@@ -84,13 +87,19 @@ class _SignInScreenState extends State<SignInScreen> {
                       replacement: const Center(
                         child: CircularProgressIndicator(),
                       ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            _signIn();
-                          }
-                        },
-                        child: const Icon(Icons.arrow_circle_right_outlined),
+                      child: Visibility(
+                        visible: _isLoginInProgress == false,
+                        replacement: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              _signIn();
+                            }
+                          },
+                          child: const Icon(Icons.arrow_circle_right_outlined),
+                        ),
                       ),
                     ),
                   ),
@@ -150,12 +159,11 @@ class _SignInScreenState extends State<SignInScreen> {
     _isLoginInProgress = true;
     setState(() {});
     Map<String, dynamic> inputParams = {
-      'email': _emailTEController.text.trim(),
-      'password': _passwordTEController.text,
+      'email': _emailController.text.trim(),
+      'password': _passwordController.text,
     };
-    final ResponseObject response = await NetworkCaller.postRequest(
-        Urls.login, inputParams,
-        fromSignIn: true);
+    final ResponseObject response =
+        await NetworkCaller.postRequest(Urls.login, inputParams);
     _isLoginInProgress = false;
     setState(() {});
 
@@ -167,7 +175,6 @@ class _SignInScreenState extends State<SignInScreen> {
       LoginResponse loginResponse =
           LoginResponse.fromJson(response.responseBody);
 
-      /// Save the data to local cache
       await AuthController.saveUserData(loginResponse.userData!);
       await AuthController.saveUserToken(loginResponse.token!);
 
@@ -187,8 +194,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   void dispose() {
-    _emailTEController.dispose();
-    _passwordTEController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 }

@@ -7,7 +7,6 @@ import 'package:task_manager/presentation/screens/add_new_task_screen.dart';
 import 'package:task_manager/presentation/utils/app_colors.dart';
 import 'package:task_manager/presentation/widgets/app_background.dart';
 import 'package:task_manager/presentation/widgets/empty_list_widget.dart';
-import 'package:task_manager/presentation/widgets/empty_list_widget.dart';
 import 'package:task_manager/presentation/widgets/profile_app_bar.dart';
 import 'package:task_manager/presentation/widgets/snack_bar_message.dart';
 import 'package:task_manager/presentation/widgets/task_card.dart';
@@ -82,7 +81,6 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // TODO : Recall the home apis after successfully add new task/tasks
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
