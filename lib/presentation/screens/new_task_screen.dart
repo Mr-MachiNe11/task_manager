@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:task_manager/data/models/task_count_by_status_data.dart';
 import 'package:task_manager/presentation/controllers/count_task_by_status_controller.dart';
+import 'package:task_manager/presentation/controllers/new_task_controller.dart';
 import 'package:task_manager/presentation/screens/add_new_task_screen.dart';
 import 'package:task_manager/presentation/utils/app_colors.dart';
+import 'package:task_manager/presentation/widgets/app_background.dart';
 import 'package:task_manager/presentation/widgets/empty_list_widget.dart';
 import 'package:task_manager/presentation/widgets/profile_app_bar.dart';
 import 'package:task_manager/presentation/widgets/task_card.dart';
@@ -33,7 +35,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: profileAppBar,
-      body: BackgroundWidget(
+      body: AppBackground(
         child: Column(
           children: [
             GetBuilder<CountTaskByStatusController>(
@@ -53,7 +55,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                 }),
             Expanded(
               child:
-              GetBuilder<CountTaskByStatusController>(builder: (newTaskController) {
+              GetBuilder<NewTaskController>(builder: (newTaskController) {
                 return Visibility(
                   visible: newTaskController.inProgress == false,
                   replacement: const Center(
@@ -90,13 +92,8 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // TODO : Recall the home apis after successfully add new task/tasks
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddNewTaskScreen(),
-            ),
-          );
+          final result = await Get.to(() => const AddNewTaskScreen());
+
 
           if (result != null && result == true) {
             _getDataFromApis();
