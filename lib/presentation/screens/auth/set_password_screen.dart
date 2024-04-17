@@ -1,5 +1,6 @@
 //set_password_screen
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/presentation/screens/auth/pin_verification_screen.dart';
 import 'package:task_manager/presentation/widgets/app_background.dart';
 
@@ -77,12 +78,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                              const PinVerificationScreen(),
-                            ));
+                        Get.to(const PinVerificationScreen());
                       },
                       child: const Text('Confirm'),
                     ),
@@ -96,7 +92,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                       const Text("Have an account?"),
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Get.back();
                         },
                         child: const Text('Sign Up'),
                       ),

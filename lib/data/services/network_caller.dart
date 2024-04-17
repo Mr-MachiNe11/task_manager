@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:task_manager/app.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:task_manager/data/models/response_object.dart';
 import 'package:task_manager/presentation/controllers/auth_controller.dart';
 import 'package:task_manager/presentation/screens/auth/sign_in_screen.dart';
@@ -14,7 +13,7 @@ class NetworkCaller {
       log(url);
       log(AuthController.accessToken.toString());
 
-      final Response response = await get(Uri.parse(url),
+      final http.Response response = await http.get(Uri.parse(url),
           headers: {'token': AuthController.accessToken ?? ''});
 
       log(response.statusCode.toString());
@@ -52,7 +51,7 @@ class NetworkCaller {
       log(url);
       log(body.toString());
 
-      final Response response = await post(Uri.parse(url),
+      final http.Response response = await http.post(Uri.parse(url),
           body: jsonEncode(body),
           headers: {
             'Content-type': 'application/json',
@@ -99,9 +98,6 @@ class NetworkCaller {
 
   static Future<void> _moveToSignIn() async {
     await AuthController.clearUserData();
-    Navigator.pushAndRemoveUntil(
-        TaskManager.navigatorKey.currentState!.context,
-        MaterialPageRoute(builder: (context) => const SignInScreen()),
-            (route) => false);
+    Get.offAll(const SignInScreen());
   }
 }

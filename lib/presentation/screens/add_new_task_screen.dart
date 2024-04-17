@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utility/urls.dart';
+import 'package:task_manager/presentation/controllers/add_new_task_controller.dart';
 import 'package:task_manager/presentation/widgets/app_background.dart';
 import 'package:task_manager/presentation/widgets/profile_app_bar.dart';
 import 'package:task_manager/presentation/widgets/snack_bar_message.dart';
@@ -16,8 +18,9 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _addNewTaskInProgress = false;
-  bool _shouldRefreshNewTaskList = false;
+  final AddNewTaskController _addNewTaskController = Get.find<AddNewTaskController>();
+  final _shouldRefreshNewTaskList = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,19 +86,23 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                     ),
                     SizedBox(
                       width: double.infinity,
-                      child: Visibility(
-                        visible: _addNewTaskInProgress == false,
-                        replacement: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              _addNewTask();
-                            }
-                          },
-                          child: const Icon(Icons.arrow_circle_right_outlined),
-                        ),
+                      child: GetBuilder<AddNewTaskController>(
+                        builder: (addNewTaskController) {
+                          return Visibility(
+                            visible: addNewTaskController.inProgress == false,
+                            replacement: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  _addNewTask();
+                                }
+                              },
+                              child: const Icon(Icons.arrow_circle_right_outlined),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -109,32 +116,21 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   }
 
   Future<void> _addNewTask() async {
-    _addNewTaskInProgress = true;
-    setState(() {});
+    final result = await _addNewTaskController.addNewTask(
+      _titleController.text.trim(),
+      _descriptionController.text.trim(),
+    );
 
-    Map<String, dynamic> inputParams = {
-      "title": _titleController.text.trim(),
-      "description": _descriptionController.text.trim(),
-      "status": "New"
-    };
-
-    final response =
-        await NetworkCaller.postRequest(Urls.createTask, inputParams);
-
-    _addNewTaskInProgress = false;
-    setState(() {});
-
-    if (response.isSuccess) {
-      _shouldRefreshNewTaskList = true;
-      _titleController.clear();
-      _descriptionController.clear();
+    if (result) {
       if (mounted) {
-        showSnackBarMessage(context, 'New task has been added!');
+        _titleController.clear();
+        _descriptionController.clear();
+        showSnackBarMessage(context, 'New task added successfully');
       }
     } else {
       if (mounted) {
-        showSnackBarMessage(
-            context, response.errorMessage ?? 'Add new task failed!', true);
+        showSnackBarMessage(context, _addNewTaskController.errorMessage, true);
+
       }
     }
   }

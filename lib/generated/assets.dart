@@ -4,6 +4,7 @@ class Assets {
 
   static const String imagesBackground = 'assets/images/background.svg';
   static const String imagesLogo = 'assets/images/logo.svg';
+  static const String imagesUnknown = 'assets/images/unknown.png';
   static const String robotoRobotoBlack = 'assets/fonts/Roboto/Roboto-Black.ttf';
   static const String robotoRobotoBlackItalic = 'assets/fonts/Roboto/Roboto-BlackItalic.ttf';
   static const String robotoRobotoBold = 'assets/fonts/Roboto/Roboto-Bold.ttf';
